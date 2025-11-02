@@ -501,7 +501,7 @@
 <!------------------ COMIENZO DEL JAVASCRIPT -------------------->
 <!------------------------------------------------------------->
 
-<script type"module">
+<script type="module">
 // Espera a que el DOM esté cargado y los servicios de Firebase estén en window
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmNoBtn = document.getElementById('confirm-no');
 
     //-------------------------------------
-    // 4. FUNCIONES DE PERSISTENCIA (Firestore)
+    // 4. LÓGICA DE DATOS (FIREBASE)
     //-------------------------------------
 
     /**
@@ -1325,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     //-------------------------------------
-    // 9. EVENT LISTENERS (Sin cambios, solo se vuelven async)
+    // 9. EVENT LISTENERS
     //-------------------------------------
 
     themeToggle.addEventListener('click', toggleTheme);
@@ -1369,26 +1369,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderProductDetail(product);
                 openModal(productDetailModal);
             }
-            return;
+            return; 
         }
-    });
+    }); 
 
-    // Listeners de Modales
-    cartIcon.addEventListener('click', () => openModal(cartModal));
-    closeCart.addEventListener('click', () => closeModal(cartModal));
-    cartModal.addEventListener('click', (e) => {
-        if (e.target.id === 'cart-modal') closeModal(cartModal);
-    });
-    
-    closeDetailModal.addEventListener('click', () => closeModal(productDetailModal));
-    productDetailModal.addEventListener('click', (e) => {
-        if (e.target.id === 'product-detail-modal') closeModal(productDetailModal);
-    });
-
+    // Administrador
     adminBtn.addEventListener('click', () => {
-        renderAdminProductsList();
-        openModal(adminModal);
+        // --- NUEVO: Verificación de Contraseña ---
+        const password = prompt("Ingresa la contraseña de administrador:", "");
+        
+        // ¡CONTRASEÑA ACTUALIZADA!
+        const ADMIN_PASSWORD = "Miri123"; 
+
+        if (password === ADMIN_PASSWORD) {
+            // Contraseña correcta, abrir el modal
+            openModal(adminModal); // Usar nueva función de modal
+            renderAdminProductsList();
+        } else if (password !== null) {
+            // Contraseña incorrecta
+            showToast("Contraseña incorrecta", 'warning');
+        }
+        // Si el usuario presiona "Cancelar" (password === null), no hacemos nada.
+        // --- FIN DE LA VERIFICACIÓN ---
     });
+
     closeAdmin.addEventListener('click', () => {
         closeModal(adminModal);
         cancelEdit();
@@ -1398,6 +1402,18 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal(adminModal);
             cancelEdit();
         }
+    });
+
+    // Modales
+    cartIcon.addEventListener('click', () => openModal(cartModal));
+    closeCart.addEventListener('click', () => closeModal(cartModal));
+    cartModal.addEventListener('click', (e) => {
+        if (e.target.id === 'cart-modal') closeModal(cartModal);
+    });
+
+    closeDetailModal.addEventListener('click', () => closeModal(productDetailModal));
+    productDetailModal.addEventListener('click', (e) => {
+        if (e.target.id === 'product-detail-modal') closeModal(productDetailModal);
     });
 
     // Listeners Modal Confirmación
@@ -1640,8 +1656,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
-
-
-
 
