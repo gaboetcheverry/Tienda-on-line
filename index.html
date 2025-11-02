@@ -19,10 +19,23 @@
     <!-- ==== Firebase SDKs (NUEVO) ==== -->
     <!-- Importamos las librerías de Firebase -->
     <script type="module">
-        // Estas son las variables de configuración que se inyectarán en tu entorno
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- INICIO DE LA CONEXIÓN A FIREBASE ---
+        // Estas son tus llaves de conexión reales de Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyBV5zi1972EN2nkkh9BYUBURn7B-SKuBuw",
+          authDomain: "tienda-online-99be3.firebaseapp.com",
+          projectId: "tienda-online-99be3",
+          storageBucket: "tienda-online-99be3.firebasestorage.app",
+          messagingSenderId: "711390430725",
+          appId: "1:711390430725:web:ca41734ac135c6db8ebe6c"
+        };
+        
+        // Tu App ID de Firebase
+        const appId = "1:711390430725:web:ca41734ac135c6db8ebe6c"; 
+        
+        // Usaremos inicio anónimo, por lo que esto es null
+        const initialAuthToken = null;
+        // --- FIN DE LA CONEXIÓN A FIREBASE ---
 
         // Inicializar Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -1627,4 +1640,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
+
+
+
 
