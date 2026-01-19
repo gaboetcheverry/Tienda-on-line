@@ -282,8 +282,7 @@
 
 <!-- LÓGICA -->
 <script type="module">
-// ELIMINADO EL WRAPPER 'DOMContentLoaded' PARA EJECUCIÓN INMEDIATA
-// ESTO SOLUCIONA EL PROBLEMA DE QUE EL CÓDIGO NO ARRANQUE
+// --- FIRESTORE FIX: Asegurar que todos los IDs sean strings ---
     const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, setLogLevel, firebaseConfig, appId, initialAuthToken } = window.firebaseServices;
 
     const WHATSAPP_NUMBER = "524612306876";
@@ -394,26 +393,29 @@
         try { await setDoc(doc(db, `/artifacts/${appId}/users/${userId}/state/main`), { cart, wishlist }, { merge: true }); } catch (e) { console.error(e); }
     }
 
+    // ID FIX: Ensure ID comparison handles both number/string mismatch from old data
     async function addToCart(id, qty=1) {
-        const p = allProducts.find(x => x.id === id); if(!p) return;
-        const ex = cart.find(x => x.id === id);
+        const strId = String(id);
+        const p = allProducts.find(x => String(x.id) === strId); if(!p) return;
+        const ex = cart.find(x => String(x.id) === strId);
         if(ex) { ex.quantity = Math.min(ex.quantity+qty, p.stock); showToast("Carrito actualizado"); }
-        else { cart.push({id, quantity:Math.min(qty, p.stock)}); showToast("Añadido al carrito"); }
+        else { cart.push({id: strId, quantity:Math.min(qty, p.stock)}); showToast("Añadido al carrito"); }
         await saveUserState();
     }
 
     async function removeFromCart(id) {
-        cart = cart.filter(x => x.id !== id);
+        cart = cart.filter(x => String(x.id) !== String(id));
         await saveUserState();
         showToast("Producto eliminado", "warning");
     }
 
     async function updateCartQuantity(id, change) {
-        const item = cart.find(x => x.id === id);
-        const p = allProducts.find(x => x.id === id);
+        const strId = String(id);
+        const item = cart.find(x => String(x.id) === strId);
+        const p = allProducts.find(x => String(x.id) === strId);
         if(!item || !p) return;
         item.quantity += change;
-        if(item.quantity <= 0) await removeFromCart(id);
+        if(item.quantity <= 0) await removeFromCart(strId);
         else {
             if(item.quantity > p.stock) item.quantity = p.stock;
             await saveUserState();
@@ -422,12 +424,13 @@
 
     function validateCartStock() {
         let change = false;
-        cart.forEach(i => { const p = allProducts.find(x => x.id === i.id); if(p && i.quantity > p.stock) { i.quantity = p.stock; change = true; } });
+        cart.forEach(i => { const p = allProducts.find(x => String(x.id) === String(i.id)); if(p && i.quantity > p.stock) { i.quantity = p.stock; change = true; } });
         if(change) saveUserState(); else renderCart();
     }
 
     async function toggleWishlist(id) {
-        if(wishlist.includes(id)) wishlist = wishlist.filter(x=>x!==id); else wishlist.push(id);
+        const strId = String(id);
+        if(wishlist.includes(strId)) wishlist = wishlist.filter(x=>x!==strId); else wishlist.push(strId);
         await saveUserState();
         updateWishlistCount();
         renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(els.search.value.toLowerCase())));
@@ -438,7 +441,7 @@
         els.grid.innerHTML = '';
         if (list.length === 0 && els.loading.style.display === 'none') { els.grid.innerHTML = '<p class="text-secondary col-span-full text-center">Sin resultados.</p>'; return; }
         list.forEach(p => {
-            const isWish = wishlist.includes(p.id);
+            const isWish = wishlist.includes(String(p.id));
             const sale = p.comparePrice ? `<span class="absolute top-2 left-2 bg-sale text-white text-xs font-bold px-2 py-1 rounded">OFERTA</span>` : '';
             const price = p.comparePrice ? `<p class="text-lg font-bold" style="color:var(--accent);">${formatCurrency(p.price)} <span class="text-sm line-through text-secondary">${formatCurrency(p.comparePrice)}</span></p>` : `<p class="text-lg font-bold" style="color:var(--accent);">${formatCurrency(p.price)}</p>`;
             const img = (p.images && p.images.length) ? p.images[0] : 'https://placehold.co/400x400/555/white?text=Producto';
@@ -473,7 +476,7 @@
         else {
             els.emptyCart.classList.add('hidden');
             cart.forEach(item => {
-                const p = allProducts.find(x => x.id === item.id);
+                const p = allProducts.find(x => String(x.id) === String(item.id));
                 if (!p) return;
                 const img = (p.images && p.images.length) ? p.images[0] : p.image;
                 els.cartItems.innerHTML += `
@@ -489,7 +492,7 @@
                 </div>`;
             });
         }
-        const total = cart.reduce((sum, i) => { const p = allProducts.find(x => x.id === i.id); return sum + (p ? p.price * i.quantity : 0); }, 0);
+        const total = cart.reduce((sum, i) => { const p = allProducts.find(x => String(x.id) === String(i.id)); return sum + (p ? p.price * i.quantity : 0); }, 0);
         els.cartTotal.textContent = formatCurrency(total);
         els.cartCount.textContent = cart.reduce((s,i)=>s+i.quantity,0);
         if(cart.length>0) els.cartCount.classList.remove('hidden'); else els.cartCount.classList.add('hidden');
@@ -497,7 +500,7 @@
         if (cart.length > 0) {
             els.waBtn.classList.remove('opacity-50','pointer-events-none');
             let msg = "¡Hola! Quisiera pedir:\n\n";
-            cart.forEach(i => { const p = allProducts.find(x => x.id === i.id); if(p) msg += `*${i.quantity}x* ${p.name} (${formatCurrency(p.price*i.quantity)})\n`; });
+            cart.forEach(i => { const p = allProducts.find(x => String(x.id) === String(i.id)); if(p) msg += `*${i.quantity}x* ${p.name} (${formatCurrency(p.price*i.quantity)})\n`; });
             msg += `\n*Total: ${formatCurrency(total)}*`;
             els.waBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
         } else {
@@ -546,7 +549,7 @@
                 inp.value = val;
             }
             if(t.id === 'detail-add-to-cart-btn') {
-                addToCart(parseInt(t.dataset.id), parseInt(document.getElementById('detail-quantity').value));
+                addToCart(t.dataset.id, parseInt(document.getElementById('detail-quantity').value));
                 closeModal(els.detailModal);
             }
         };
@@ -593,7 +596,8 @@
         if (productsListener) productsListener();
         const q = query(collection(db, `/artifacts/${appId}/public/data/products`));
         productsListener = onSnapshot(q, (snapshot) => {
-            allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            // ID FIX: Ensure ID is always a string from the document ID
+            allProducts = snapshot.docs.map(d => ({ ...d.data(), id: d.id }));
             if(els.loading) els.loading.style.display = 'none';
             filterProducts(); renderAdminProductsList(); validateCartStock();
         }, (err) => { console.error(err); if(els.loading) els.loading.textContent = "Error al cargar"; });
@@ -626,20 +630,22 @@
 
     els.grid.onclick = (e) => {
         const t = e.target;
-        if(t.closest('.add-to-cart-btn')) addToCart(parseInt(t.closest('.add-to-cart-btn').dataset.id));
-        else if(t.closest('.wishlist-toggle-btn')) toggleWishlist(parseInt(t.closest('.wishlist-toggle-btn').dataset.id));
+        // ID FIX: Removing parseInt to ensure string comparison
+        if(t.closest('.add-to-cart-btn')) addToCart(t.closest('.add-to-cart-btn').dataset.id);
+        else if(t.closest('.wishlist-toggle-btn')) toggleWishlist(t.closest('.wishlist-toggle-btn').dataset.id);
         else if(t.closest('.product-detail-btn')) {
-            const p = allProducts.find(x => x.id === parseInt(t.closest('.product-detail-btn').dataset.id));
+            const id = t.closest('.product-detail-btn').dataset.id;
+            const p = allProducts.find(x => String(x.id) === String(id));
             if(p) { renderProductDetail(p); openModal(els.detailModal); }
         }
     };
 
     els.cartItems.onclick = (e) => {
         const t = e.target;
-        if(t.closest('.remove-from-cart-btn')) removeFromCart(parseInt(t.closest('.remove-from-cart-btn').dataset.id));
+        if(t.closest('.remove-from-cart-btn')) removeFromCart(t.closest('.remove-from-cart-btn').dataset.id);
         else if(t.closest('.quantity-change-btn')) {
             const btn = t.closest('.quantity-change-btn');
-            updateCartQuantity(parseInt(btn.dataset.id), parseInt(btn.dataset.change));
+            updateCartQuantity(btn.dataset.id, parseInt(btn.dataset.change));
         }
     };
 
@@ -681,8 +687,8 @@
         const jsonSize = new Blob([JSON.stringify(fd)]).size;
         if(jsonSize > 1000000) { showToast("Demasiadas fotos (Límite 1MB)", "warning"); return; }
         try {
-            if(editingProductId) { await updateDoc(doc(db, `/artifacts/${appId}/public/data/products`, editingProductId.toString()), fd); showToast("Actualizado"); }
-            else { const newId = Date.now(); await setDoc(doc(db, `/artifacts/${appId}/public/data/products`, newId.toString()), { ...fd, id: newId }); showToast("Creado"); }
+            if(editingProductId) { await updateDoc(doc(db, `/artifacts/${appId}/public/data/products`, String(editingProductId)), fd); showToast("Actualizado"); }
+            else { const newId = Date.now().toString(); await setDoc(doc(db, `/artifacts/${appId}/public/data/products`, newId), { ...fd, id: newId }); showToast("Creado"); }
             cancelEdit();
         } catch(err) { console.error(err); showToast("Error al guardar", "warning"); }
     };
@@ -690,15 +696,16 @@
     els.adminList.onclick = (e) => {
         const t = e.target;
         if(t.closest('.delete-product-btn')) {
-            const id = parseInt(t.closest('.delete-product-btn').dataset.id);
+            const id = t.closest('.delete-product-btn').dataset.id;
             showConfirm("¿Eliminar?", async () => {
-                await deleteDoc(doc(db, `/artifacts/${appId}/public/data/products`, id.toString()));
+                await deleteDoc(doc(db, `/artifacts/${appId}/public/data/products`, String(id)));
                 showToast("Eliminado"); closeModal(els.confirmModal);
             });
         }
         if(t.closest('.edit-product-btn')) {
-            const id = parseInt(t.closest('.edit-product-btn').dataset.id);
-            const p = allProducts.find(x => x.id === id);
+            // ID FIX: Removing parseInt to ensure string comparison works
+            const id = t.closest('.edit-product-btn').dataset.id;
+            const p = allProducts.find(x => String(x.id) === String(id));
             if(p) {
                 editingProductId = id;
                 document.getElementById('product-name').value = p.name;
@@ -748,6 +755,7 @@
             }
         });
     } catch(e) { console.error("Firebase Init Error", e); }
+});
 </script>
 </body>
 </html>
