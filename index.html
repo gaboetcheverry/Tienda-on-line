@@ -282,7 +282,8 @@
 
 <!-- LÓGICA -->
 <script type="module">
-document.addEventListener('DOMContentLoaded', () => {
+// ELIMINADO EL WRAPPER 'DOMContentLoaded' PARA EJECUCIÓN INMEDIATA
+// ESTO SOLUCIONA EL PROBLEMA DE QUE EL CÓDIGO NO ARRANQUE
     const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, setLogLevel, firebaseConfig, appId, initialAuthToken } = window.firebaseServices;
 
     const WHATSAPP_NUMBER = "524612306876";
@@ -429,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(wishlist.includes(id)) wishlist = wishlist.filter(x=>x!==id); else wishlist.push(id);
         await saveUserState();
         updateWishlistCount();
-        renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(els.search.value.toLowerCase()))); // Re-render to update heart
+        renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(els.search.value.toLowerCase())));
     }
 
     // --- 3. RENDER FUNCTIONS ---
@@ -747,7 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } catch(e) { console.error("Firebase Init Error", e); }
-});
 </script>
 </body>
 </html>
