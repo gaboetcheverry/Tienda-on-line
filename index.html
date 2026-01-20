@@ -447,10 +447,11 @@
             const img = (p.images && p.images.length) ? p.images[0] : 'https://placehold.co/400x400/555/white?text=Producto';
             const count = (p.images && p.images.length > 1) ? `<span class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded"><i class="fas fa-images mr-1"></i>${p.images.length}</span>` : '';
             
+            // FOTO COMPLETA (v14 Fix)
             els.grid.innerHTML += `
             <div class="card rounded-lg shadow-lg overflow-hidden flex flex-col transition-transform hover:scale-[1.02] animate-slideUp">
-                <div class="relative">
-                    <img src="${img}" class="w-full h-56 object-cover cursor-pointer product-detail-btn" data-id="${p.id}">
+                <div class="relative bg-white dark:bg-gray-800">
+                    <img src="${img}" class="w-full h-64 object-contain cursor-pointer product-detail-btn" data-id="${p.id}">
                     ${sale}${count}
                     <button class="wishlist-toggle-btn absolute top-2 right-2 bg-card bg-opacity-70 p-2 rounded-full ${isWish ? 'text-warning' : 'text-secondary'}" data-id="${p.id}"><i class="fas fa-heart"></i></button>
                 </div>
@@ -481,7 +482,7 @@
                 const img = (p.images && p.images.length) ? p.images[0] : p.image;
                 els.cartItems.innerHTML += `
                 <div class="flex items-center justify-between gap-4 p-4 border-b border-dynamic animate-fadeIn">
-                    <img src="${img}" class="w-16 h-16 object-cover rounded-lg">
+                    <img src="${img}" class="w-16 h-16 object-contain bg-white dark:bg-gray-800 rounded-lg border border-dynamic">
                     <div class="flex-grow"><h4 class="font-semibold text-primary">${p.name}</h4><p class="text-sm text-secondary">${formatCurrency(p.price)}</p></div>
                     <div class="flex items-center gap-2">
                         <button class="quantity-change-btn w-7 h-7 text-lg text-secondary bg-dark rounded" data-id="${item.id}" data-change="-1">-</button>
@@ -513,11 +514,11 @@
         const imgs = (p.images && p.images.length) ? p.images : ['https://placehold.co/400x400/555/white?text=Producto'];
         currentImageIndex = 0;
         const galNav = imgs.length > 1 ? `<button class="gallery-nav-btn absolute left-2 top-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full" data-dir="prev"><i class="fas fa-chevron-left"></i></button><button class="gallery-nav-btn absolute right-2 top-1/2 bg-black bg-opacity-50 text-white w-10 h-10 rounded-full" data-dir="next"><i class="fas fa-chevron-right"></i></button>` : '';
-        const thumbs = imgs.length > 1 ? `<div class="flex gap-2 mt-3 overflow-x-auto scrollbar">${imgs.map((src,i)=>`<img src="${src}" class="thumbnail-img w-16 h-16 object-cover rounded-lg border-2 ${i===0?'border-accent':'border-transparent'}" data-index="${i}">`).join('')}</div>` : '';
+        const thumbs = imgs.length > 1 ? `<div class="flex gap-2 mt-3 overflow-x-auto scrollbar">${imgs.map((src,i)=>`<img src="${src}" class="thumbnail-img w-16 h-16 object-contain bg-white dark:bg-gray-800 rounded-lg border-2 ${i===0?'border-accent':'border-dynamic'}" data-index="${i}">`).join('')}</div>` : '';
         
         els.detailContent.innerHTML = `
         <div>
-            <div class="relative"><img id="detail-img" src="${imgs[0]}" class="w-full h-80 object-cover rounded-lg shadow-lg">${galNav}</div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-lg overflow-hidden"><img id="detail-img" src="${imgs[0]}" class="w-full h-96 object-contain shadow-lg">${galNav}</div>
             ${thumbs}
         </div>
         <div class="flex flex-col justify-between">
@@ -561,7 +562,7 @@
             const img = (p.images && p.images.length) ? p.images[0] : p.image;
             els.adminList.innerHTML += `
             <div class="flex items-center justify-between p-4 border border-dynamic rounded-lg bg-dark">
-                <div class="flex items-center gap-4"><img src="${img}" class="w-16 h-16 object-cover rounded-lg"><div><h4 class="font-semibold text-primary">${p.name}</h4><p class="text-xs text-secondary">Fotos: ${p.images?p.images.length:1}</p></div></div>
+                <div class="flex items-center gap-4"><img src="${img}" class="w-16 h-16 object-contain bg-white dark:bg-gray-800 rounded-lg border border-dynamic"><div><h4 class="font-semibold text-primary">${p.name}</h4><p class="text-xs text-secondary">Fotos: ${p.images?p.images.length:1}</p></div></div>
                 <div class="flex gap-2"><button class="edit-product-btn bg-accent text-dark px-3 py-1 rounded" data-id="${p.id}"><i class="fas fa-edit"></i></button><button class="delete-product-btn bg-warning text-white px-3 py-1 rounded" data-id="${p.id}"><i class="fas fa-trash"></i></button></div>
             </div>`;
         });
@@ -570,7 +571,7 @@
     function renderImagePreviews() {
         els.imgPreview.innerHTML = '';
         currentProductImages.forEach((src, i) => {
-            els.imgPreview.innerHTML += `<div class="relative"><img src="${src}" class="w-full h-20 object-cover rounded-lg border border-dynamic"><button type="button" class="remove-preview-img absolute -top-2 -right-2 bg-warning text-white w-6 h-6 rounded-full text-xs" data-index="${i}">×</button></div>`;
+            els.imgPreview.innerHTML += `<div class="relative"><img src="${src}" class="w-full h-20 object-contain bg-white dark:bg-gray-800 rounded-lg border border-dynamic"><button type="button" class="remove-preview-img absolute -top-2 -right-2 bg-warning text-white w-6 h-6 rounded-full text-xs" data-index="${i}">×</button></div>`;
         });
     }
 
